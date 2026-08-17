@@ -1,0 +1,12 @@
+# Obsidian internals
+.obsidian/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Smart Connections embeddings (large, regenerable)
+.smart-connections/
+
+# Local 
+.env
