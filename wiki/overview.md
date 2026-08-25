@@ -1,37 +1,126 @@
 ---
 title: "Knowledge Base Overview"
 type: synthesis
-tags: []
+tags: [machine-learning, deep-learning, evaluation, reinforcement-learning, representation-learning, language-modelling]
 sources: []
-confidence: 0.4
+confidence: 0.75
 provenance:
-  extracted: 0
-  inferred: 100
-  ambiguous: 0
-lifecycle: draft
-created: 
-updated: 
+  extracted: 5%
+  inferred: 50%
+  generated: 35%
+  imported: 8%
+  ambiguous: 2%
+lifecycle: reviewed
+created: 2026-08-12
+updated: 2026-08-23
 ---
 
 # Knowledge Base Overview
 
-This page provides a high-level map of the knowledge contained in this wiki. It is rewritten periodically as the wiki grows. See [[index]] for the full page catalog.
+A narrative map of what this vault holds, how it hangs together, and — unusually prominently — **where it is thin**. The index is the catalog; this page is the argument for the catalog's shape.
 
-## Domains Covered
+**Scope: machine learning, LLMs, and mathematical foundations.** Football and sports analytics belong to the sibling vault.
 
+## Composition
 
-## Key Themes
+| | Count |
+|---|---|
+| Total pages | **179** |
+| Concepts | 108 |
+| Entities | 42 |
+| Source summaries | 25 |
+| Dashboards | 3 |
 
+**All 25 raw sources are ingested.** Mean page confidence 0.818; 60 pages `reviewed`, 115 `draft`, 1 `archived`.
+
+## The Central Fact About This Vault
+
+> ⚠️ **Roughly half the concept pages have no held source.**
+
+This vault was created in August 2026 by splitting a sports-analytics knowledge base. The **sources** that went to football were the ones grounding much of the general ML material, because that material had been written to serve football papers. What arrived here was a set of concepts whose evidence stayed behind.
+
+Rather than delete those concepts or pretend to sourcing, they were **written from background knowledge and marked `imported:`** — visibly, per page, with a warning box on anything above roughly 60%.
+
+| Cluster | Held sources | Typical `imported:` |
+|---|---|---|
+| Transformer and attention | **Strong** — Vaswani, Bahdanau, Vinyals | 10–25% |
+| Language models | **Strong** — GPT, BERT, InstructGPT, scaling laws | 10–30% |
+| Generative models | **Partial** — VLAE only | 20–50% |
+| Rating systems | **Partial** — TrueSkill only | 40–47% |
+| Evaluation and validity | **None** | 62–70% |
+| Reinforcement learning | **One** — InstructGPT, an application paper | **60–78%** |
+| Vision geometry | **None** | 64–66% |
+| Statistics and inference | **None** | 62–68% |
+
+**The vault defines PPO and RLHF but not, from any source, reinforcement learning itself.** That is the sharpest instance of the pattern.
+
+## Source Acquisition Priorities
+
+The most useful thing that can be done with this vault is to reduce the table above. In descending order of pages grounded per source:
+
+| Priority | Source | Would ground |
+|---|---|---|
+| **1** | A foundational RL text (Sutton & Barto) | `reinforcement-learning`, `markov-game`, `value-iteration`, `temporal-difference-learning`, `policy-modelling`, `imitation-learning` — **six pages at 60–78% imported** |
+| **2** | Mnih et al. (2015) DQN; Hester et al. (2018) DQfD | `deep-q-network`, and stabiliser material referenced from four others |
+| **3** | A measurement-theory or psychometrics text | `predictive-validity`, `split-half-reliability`, `identifiability` |
+| **4** | Guo et al. (2017) on calibration | `probability-calibration`, `probabilistic-classification`, `uncertainty-quantification` |
+| **5** | Hartley & Zisserman, *Multiple View Geometry* | `homography`, `camera-calibration` |
+| **6** | Schulman et al. (2017) PPO and TRPO | `proximal-policy-optimization`, currently sourced only through an application |
+| **7** | Rasmussen & Williams on Gaussian processes | `gaussian-process` |
+| **8** | A point-process text (Daley & Vere-Jones) | `point-process`, `neural-temporal-point-process` |
+| **9** | Goodfellow et al. (2014); Isola et al. (2017) | `conditional-gan`, `generative-model` |
+| **10** | Lee & Seung (1999); Friedman (2001) | `non-negative-matrix-factorization`, `gradient-boosting` |
+
+**Priorities 1 and 2 together would move nine pages** from the vault's weakest tier to its strongest.
+
+Two further gaps are structural rather than evidential: **`random-forest` and `feature-attribution` are referenced but have no page**, left uncreated rather than expanding the `imported:` tier further.
+
+## The Hubs
+
+| Page | Inbound |
+|---|---|
+| [[transformer]] | 57 |
+| [[model-selection]] | 45 |
+| [[uncertainty-quantification]] | 28 |
+| [[attention-mechanism]] | 23 |
+| [[bayesian-inference]] | 23 |
+| [[predictive-validity]] | 23 |
+| [[representation-learning]] | 23 |
+| [[scaling-laws]] | 22 |
+| [[lstm]] | 21 |
+
+**[[model-selection]] at 45 is the surprise.** Not a headline topic, but the asserted-parameter problem it describes is relevant on nearly every page discussing a method with knobs. Its four-kind taxonomy — horizon, shape, gate, prior strength — is the vault's most reused idea.
+
+**[[transformer]] at 57** reflects that the substructure is meaningless without it. It was the last major page created and unblocked 60 others.
+
+## Recurring Themes
+
+Claims that recur across independently written clusters, which usually signals something real:
+
+- **A metric that cannot fail is not evidence.** `self-prediction-is-not-validation`, `a-proxy-must-be-validated-against-the-thing-it-replaces`, `zero-shot-claims-depend-on-what-the-pretraining-corpus-contained`.
+- **Free parameters hide in plain sight.** `asserted-parameters-are-untested-model-selection`, `factorisation-order-is-an-unswept-parameter`, `imitation-weight-tunes-the-conclusion`.
+- **Measurement noise and real variation are conflated.** `instability-and-variation-are-the-same-number` and `measurement-noise-and-real-variation-need-separate-parameters`, reached from measurement theory and rating systems independently.
+- **Assumptions move rather than disappear.** `transfer-imports-the-pretraining-corpus-assumptions`, `a-constructed-graph-is-a-modelling-assumption`, `tokenization-decisions-are-invisible-downstream`.
+
+## Migration Record
+
+Created 2026-08 from `knowledge-sports`. 96 pages and 16 raw sources moved; 9 sources are held in both vaults because a page in each depends on them.
+
+**What the migration taught:**
+
+- **Copied pages carry their frontmatter.** 19 phantom `sources:` entries — paths to files that never arrived — across 15 pages. Every page that arrived by file copy had at least one; **no page written here did.** Neither `find_mentioned_but_missing` nor `list_unprocessed_sources` detects this.
+- **The fork list was built from one side.** It asked what football needed and never what this vault needed, so ~35 general concepts stayed behind because their *sources* were football papers, though the *concepts* were not.
+- **A page is not portable; an argument is.** Every fork needed its sources pruned, links redirected and examples replaced. The reasoning survived; everything vault-specific did not.
 
 ## Dashboards
 
-Live Dataview-powered views:
+- [[health|Wiki Health]] — stale, low-confidence, draft and orphan-risk pages
+- [[reinforcement|Reinforcement]] — ageing, single-source and confidence-decay watch
+- [[sources|Source Tracking]] — raw sources and reference counts
 
-- [[health|Wiki Health Dashboard]] — stale, low-confidence, draft, and orphan-risk pages.
-- [[reinforcement|Reinforcement Dashboard]] — aging, single-source, and confidence-decay watch.
-- [[sources|Source Tracking Dashboard]] — all raw sources and how often each is referenced.
+## Maintenance Notes
 
-## Open Questions
-
-## Growth Notes
-
+- 155 tags declared, 134 in use. The 21 unused are mostly meta and entity vocabulary held ready
+- **115 of 179 pages are `draft`**, appropriate given how many were written in a single migration
+- The full page catalog lives in `index.md` at the vault root, outside the wiki folder
+- Rewrite this page against `vault_stats` rather than from memory, and update the acquisition table whenever a source lands
