@@ -53,6 +53,7 @@ two namespaces recording one fact drift apart, and did.
 
 ### Representation
 - `representation-learning` — learning useful data representations for downstream tasks
+- `theory-based-modelling` — encoding domain structure as an explicit model, often to supply features to a learned one
 - `feature-engineering` — constructing, selecting, or learning input representations
 - `tokenization` — converting raw data into discrete units for sequence models
 - `entity-embedding` — learned dense representations of discrete entities
@@ -62,6 +63,9 @@ two namespaces recording one fact drift apart, and did.
 
 ### Sequence and Generative Models
 - `sequence-modelling` — modelling sequential data (text, time series, etc.)
+- `trajectory-prediction` — forecasting future positions of one or more interacting agents
+- `spatiotemporal` — joint modelling of variation across both space and time
+- `event-prediction` — forecasting the time, type and attributes of the next event in a sequence
 - `sequence-alignment` — matching two sequences that may differ in timing or length (DTW, edit distance)
 - `set-modelling` — handling unordered sets as inputs or outputs in neural models
 - `ordering` — effects of data ordering on model training and performance
@@ -124,6 +128,7 @@ two namespaces recording one fact drift apart, and did.
 - `clustering` — unsupervised partitioning of data into groups
 - `hierarchical-model` — multilevel models sharing information across units via partial pooling
 - `time-series` — observations indexed by time
+- `volatility` — variability of a measurement around its own trend, as distinct from uncertainty about it
 - `smoothing` — recovering trend from noisy series
 
 ### Rating and Comparison
@@ -146,6 +151,7 @@ two namespaces recording one fact drift apart, and did.
 - `selection-bias` — systematic non-representativeness of a sample
 - `positive-unlabeled-learning` — learning where only positive and unlabelled instances are observed
 - `model-selection` — choosing model complexity via penalised likelihood or validation
+- `model-decomposition` — estimating a joint quantity by fitting and recombining separate subcomponents
 - `interpretability` — the degree to which a model's outputs can be explained in human terms
 - `feature-attribution` — per-feature explanation of a model's output (SHAP, LIME, permutation importance)
 - `gradient-boosting` — ensemble methods building additive trees via boosting
@@ -155,6 +161,10 @@ two namespaces recording one fact drift apart, and did.
 
 ### Vision
 - `computer-vision` — image recognition, object detection, and visual tasks
+- `camera-calibration` — estimating camera parameters to map image to world coordinates
+- `projective-geometry` — homographies, epipolar geometry, and camera projection models
+- `image-alignment` — registering or aligning images via geometric or intensity-based methods
+- `radial-distortion` — lens distortion modelling (barrel, pincushion) in camera calibration
 - `semantic-segmentation` — per-pixel classification of images into semantic categories
 - `object-detection` — locating and classifying objects in images
 - `optical-flow` — estimating motion fields between consecutive frames
