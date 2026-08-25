@@ -98,6 +98,8 @@ in a turn.
 
 Whitespace in `old_str` and `new_str` is significant. Leading and trailing newlines are part of the match and part of the replacement — a trailing newline present in one and absent from the other will silently join or split lines. Prefer anchoring on complete lines, and re-read the file after any edit whose only purpose was to test tooling.
 
+Before writing a See Also list or any link to a page you have not already linked on the current page, call `check_links` with the intended targets. The tag and page namespaces are separate, and reaching for a related concept is where they get confused.
+
 **Patching is cheap; coherence is not.** If accumulated small edits
 would leave a page's structure no longer matching its argument, rewrite
 it with `write_note` rather than patching further.
