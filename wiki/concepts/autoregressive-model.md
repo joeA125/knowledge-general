@@ -2,7 +2,7 @@
 title: "Autoregressive Model"
 type: concept
 tags: [deep-learning, generative-model, autoregressive-model, sequence-modelling, point-process, density-estimation]
-sources: [raw/papers/variational-lossy-autoencoders.md, raw/papers/transformer-point-process-football-event-modelling.md]
+sources: [raw/papers/variational-lossy-autoencoders.md]
 confidence: 0.9
 provenance:
   extracted: 55%
@@ -10,7 +10,7 @@ provenance:
   ambiguous: 7%
 lifecycle: reviewed
 created: 2026-05-10
-updated: 2026-07-23
+updated: 2026-08-14
 ---
 
 # Autoregressive Model
@@ -25,37 +25,38 @@ An autoregressive model factorises a joint distribution using the chain rule: $p
 
 ## Factorising *Within* an Element, Not Just Across a Sequence
 
-The chain rule applies to any set of variables, not only to sequence positions. [[nmstpp|NMSTPP]] uses it to decompose the *components of a single event* — its time, location, and type:
+The chain rule applies to any set of variables, not only to sequence positions. Where a single element has several attributes — a time, a location, a type — the joint distribution over those attributes can itself be factorised:
 
-$$f(t_i, z_i, m_i \mid H_i) = f_t(t_i \mid H_i) \; f_z(z_i \mid t_i, H_i) \; f_m(m_i \mid t_i, z_i, H_i)$$
+$$f(a, b, c \mid H) = f_a(a \mid H)\; f_b(b \mid a, H)\; f_c(c \mid a, b, H)$$
 
-Each component is predicted by its own network, but each conditions on the components already predicted. This is autoregression across an event's *attributes*, nested inside autoregression across the event *sequence*.
+Each component gets its own network, and each conditions on the components already predicted. **Autoregression across an element's attributes, nested inside autoregression across the sequence.**
 
-The payoff is measurable: severing the within-event links so each network sees only $H_i$ raises total loss from 4.40 to 4.44, with the entire degradation falling on the last component in the chain.
+The cost is that later components condition on earlier *predictions* rather than earlier truths, so error propagates within a single element and the last component in the chain absorbs it. Severing the within-element links removes that propagation and loses the dependence — which is usually the worse trade. See [[event-prediction]].
 
 ## Ordering Is Free in Theory, Not in Practice
 
 Any ordering of the chain rule gives a valid factorisation of the same joint distribution — the decomposition is exact regardless. With unlimited capacity and data, ordering would be irrelevant.
 
-It is not. [[transformer-point-process-football-event-modelling|Yeung et al. (2023)]] grid-search all six orderings of $(t, z, m)$ and find a 0.18 spread in total loss, with $(t, z, m)$ best and $(z, t, m)$ worst — the difference concentrated almost entirely in the final component's loss.
+It is not.
 
-The same phenomenon appears elsewhere in autoregressive modelling: PixelCNN's raster-scan order over pixels is a choice, and the [[read-process-write|Order Matters]] paper makes the analogous point for sets, showing that input and output ordering materially affect seq2seq performance even when the underlying object is unordered.
+> ### `factorisation-order-is-an-unswept-parameter`
+> **Where a model factorises a multi-component prediction, the ordering determines which conditionals are easy to learn. It is exact in theory and consequential in practice, and is almost always asserted rather than searched — with the differences concentrating in whichever component comes last.**
+> ^[generated. rests-on: imported:autoregressive-ordering-effects]
 
-The practical reading is that ordering determines *which conditionals are easy* — put the components that best predict the others first.
+The phenomenon recurs across autoregressive modelling: PixelCNN's raster-scan order over pixels is a choice, and [[sequence-to-sequence-sets|Order Matters]] makes the analogous point for sets, showing input and output ordering materially affect seq2seq performance even when the underlying object is unordered.
+
+The practical reading: **put first the components that best predict the others.**
 
 ## Relation to VAEs
 
-When used as a VAE decoder, autoregressive models can model data without using the latent code, causing the "information preference" problem addressed by the [[variational-lossy-autoencoder]].
+Used as a [[variational-autoencoder|VAE]] decoder, an autoregressive model can reconstruct the data without using the latent code at all — the information-preference problem. [[variational-lossy-autoencoders|VLAE]] turns that failure into a design lever by restricting the decoder's receptive field.
 
 ## Relation to Point Processes
 
-A temporal [[point-process]] shares exactly this structure — $f(t_1, t_2, \dots) = \prod_i f(t_i \mid H_i)$ — but over continuous time rather than a fixed sequence index. The extra work a point process does is modelling *when* the next element occurs, not merely what it is.
+A temporal [[point-process]] shares exactly this structure — $f(t_1, t_2, \dots) = \prod_i f(t_i \mid H_i)$ — but over continuous time rather than a fixed sequence index. **The extra work a point process does is modelling *when* the next element occurs, not merely what it is.**
 
 ## See Also
 
-- [[variational-lossy-autoencoder]]
-- [[nmstpp]]
-- [[point-process]]
-- [[read-process-write]]
-- [[transformer]]
-- [[lstm]]
+- [[generative-model]] · [[variational-autoencoder]] · [[transformer]] · [[lstm]] · [[gpt]] · [[tokenization]]
+- [[point-process]] · [[neural-temporal-point-process]] · [[event-prediction]] · [[sequence-to-sequence-sets|Order Matters Summary]]
+- [[model-selection]] · [[dilated-convolution]] · [[variational-lossy-autoencoders|VLAE Summary]]

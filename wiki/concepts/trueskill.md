@@ -1,84 +1,78 @@
 ---
 title: "TrueSkill"
 type: concept
-tags: [bayesian, ranking-system, matchmaking, gaming, statistics, reinforcement-learning, evaluation, simulator, agent-based-simulation]
-sources: [raw/papers/bayesian-true-skill-rating.md, raw/papers/ai_football_reinforcement_learning.md]
+tags: [bayesian, ranking-system, matchmaking, gaming, statistics, evaluation, uncertainty-quantification, message-passing]
+sources: [raw/papers/bayesian-true-skill-rating.md]
 confidence: 0.9
 provenance:
-  extracted: 78%
-  inferred: 15%
-  generated: 4%
-  imported: 0%
-  ambiguous: 3%
+  extracted: 74%
+  inferred: 16%
+  generated: 6%
+  imported: 2%
+  ambiguous: 2%
 lifecycle: reviewed
 created: 2026-05-08
-updated: 2026-08-08
+updated: 2026-08-14
 ---
 
 # TrueSkill
 
-TrueSkill is a Bayesian skill rating system developed by [[microsoft-research]] (Herbrich, Minka & Graepel, 2006) that generalises the [[elo-rating-system]]. It is used for player matchmaking in online gaming, most notably on Xbox Live.
+A Bayesian skill rating system developed by [[microsoft-research]] (Herbrich, Minka & Graepel, 2006), generalising the [[elo-rating-system|Elo]] system. Deployed for matchmaking on Xbox Live at 2+ million subscribers — one of the largest applications of [[bayesian-inference]] at the time.
 
-## Key Properties
+## The Model
 
-- **Uncertainty tracking:** Each player's skill is a Gaussian belief $\mathcal{N}(\mu, \sigma^2)$, not a point estimate.
-- **Draw modelling:** Explicit draw margin $\epsilon$ models the probability of tied outcomes.
-- **Team support:** Individual skills are inferred from team results by modelling team performance as the sum of individual performances.
-- **Multi-player support:** Handles arbitrary numbers of competing players/teams via pairwise team performance difference comparisons.
-- **Fast convergence:** Approaches target skill in ~10 games for 8-player matches, near the information-theoretic limit.
+- Each player's skill is a Gaussian belief $s_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$, **not a point estimate**.
+- In a game they exhibit a performance $p_i \sim \mathcal{N}(s_i, \beta^2)$ around that skill.
+- **Team performance is the sum** of individual performances.
+- Outcomes are the *ordering* of team performances, with an explicit draw margin $\epsilon$.
 
-## How It Works
+Inference runs as [[message-passing]] on a graphical model, with [[expectation-propagation]] approximating the non-Gaussian comparison factors by moment matching. Each game's posterior becomes the next game's prior.
 
-1. Model the game as a [[factor-graph]] with variables for skills, performances, team performances, and performance differences.
-2. Run [[approximate-message-passing]] (based on [[expectation-propagation]]) to compute posterior skill distributions.
-3. Use [[gaussian-density-filtering]]: the posterior after each game becomes the prior for the next.
+Priors are $\mu_0 = 25$, $\sigma_0 = 25/3$; the displayed rating is the conservative $\mu_i - 3\sigma_i$, so leaderboard tops hold only players who are both strong **and** well-measured.
 
-## Skill Display
+## What It Generalises
 
-The displayed rating is a conservative estimate: $\mu - 3\sigma$. This ensures leaderboard tops are populated only by players who are both highly skilled and well-measured.
+| | Uncertainty | Draws | Teams | Multi-player |
+|---|---|---|---|---|
+| [[elo-rating-system\|Elo]] | No | No | No | No |
+| [[glicko-rating-system\|Glicko]] | **Yes** | No | No | No |
+| **TrueSkill** | **Yes** | **Yes** | **Yes** | **Yes** |
 
-## Matchmaking
+Each added column costs tractability. Elo needs no inference at all; Glicko's updates stay near closed form; **TrueSkill needs approximate inference on a graphical model.** That is the price of the last three columns, and it is why the three systems coexist rather than one superseding the others.
 
-Match quality is derived from draw probability relative to the maximum possible draw probability, aligning fair matchmaking with informative experimental design.
+## Convergence
 
-## Rating Agents Rather Than People
+On Halo 2 beta data, TrueSkill beat Elo on prediction accuracy across most modes and converged in **~10 games against Elo's hundreds** — near the information-theoretic limit of about 5 for an 8-player match.
 
-> **Added 2026-08-08** on ingest of [[ai-football-reinforcement-learning|Scott, Fujii & Onishi]], the vault's first application of TrueSkill to something other than human competitors.
+The reason is the uncertainty: a new player's wide $\sigma$ produces large updates, and a well-measured player's narrow $\sigma$ produces small ones. Elo has no per-player measure of what it already knows, so it must apply one global step size to everyone. See [[elo-rating-system]].
 
-They use TrueSkill to rank **15 RL agents** — five training checkpoints (20%, 40%, 60%, 80%, 100%) from each of three curricula (easy, medium, hard built-in opponents) — via **50 round-robin tournaments, 5,250 matches**, in the [[google-research-football|GFootball]] simulator.
+## Rating Non-Human Competitors
 
-The fit is unusually good, and for a reason the original paper could not have anticipated:
+The system's assumptions were written for people, and they hold **differently** for frozen model checkpoints:
 
-| TrueSkill assumes | Human leagues | **RL checkpoints** |
+| TrueSkill assumes | Human leagues | Model checkpoints |
 |---|---|---|
 | Skill is latent and unobservable | Yes | Yes |
-| Matches are expensive to run | Yes | **No — arbitrarily many** |
+| Matches are expensive | Yes | **No — arbitrarily many** |
 | Skill drifts over time | Yes | **No — a checkpoint is frozen** |
-| Competitors are numerous | Yes | 15 |
-
-**The uncertainty machinery that justifies TrueSkill for matchmaking is largely wasted here.** With frozen agents and 5,250 cheap matches, $\sigma$ collapses and the ranking is essentially a well-regularised round-robin win rate. What TrueSkill supplies is a *principled single number* on a common scale — which is what the paper needs, since its entire analysis is correlating play-style statistics against that number.
 
 > ### `latent-skill-models-suit-frozen-agents-better-than-people`
-> **Skill-rating systems built for humans transfer unusually cleanly to model checkpoints, because checkpoints satisfy the stationarity assumption that humans violate. The cost is that the uncertainty apparatus, which is the reason to prefer such systems over win rates, becomes redundant once matches are cheap.**
-> ^[generated: no source states this; drawn from the assumption set of the original paper read against Scott et al.'s use. rests-on: source:herbrich-trueskill-assumptions, source:scott-trueskill-tournament]
+> **Skill-rating systems built for humans transfer unusually cleanly to model checkpoints, because a checkpoint satisfies the stationarity assumption that humans violate. The cost is that the uncertainty apparatus — the reason to prefer such systems over a win rate — becomes redundant once matches are cheap.**
+> ^[generated: drawn from the assumption set of the held paper. rests-on: source:herbrich-trueskill-assumptions]
 
-## The Anomaly That Followed
+Where matches are cheap and competitors frozen, $\sigma$ collapses and the ranking approaches a well-regularised round-robin win rate. What survives is the useful part: **a principled single number on a common scale**, which is what any correlation analysis against a competitiveness axis requires.
 
-Scott et al.'s ranking produced a result they call counter-intuitive and do not resolve: **agents trained against the *easy* bot rank 1, 2 and 3**, above agents trained four times longer against the hard bot. They suggest better training strategies exist and defer the question.
+⚠️ **A closed pool is a closed system.** A rating estimated from competitors who only ever played each other is defined relative to that pool, and nothing anchors it to external quality. TrueSkill's own framing warns about this and it is easily forgotten when the leaderboard looks decisive.
 
-This matters beyond their paper because **every correlation they report is measured against this axis** — including the finding that better agents shoot more, which contradicts [[optimal-decisions-shot-taking-situations|Yeung & Fujii]] on real football. See [[observed-versus-optimal-decisions]].
+## Two Deployment Observations
 
-Two readings, undistinguished by anything held:
+**Matchmaking creates feedback loops.** Players game the system to protect ratings — declining unfavourable matches, playing at particular times. **Any rating fed back into the process that generates its own data changes the behaviour it measures.**
 
-- **The ranking is right and the curriculum intuition is wrong** — training against weak opponents may produce more transferable play than over-fitting to one strong opponent's exploitable habits.
-- **The ranking is measuring something narrower than competence** — round-robin performance against *this particular pool of 15* rather than football ability.
-
-The second is the sort of thing TrueSkill's own framing warns about: a rating is defined relative to the population it was estimated in. **A leaderboard of fifteen agents that only ever played each other is a closed system**, and nothing anchors it to external football quality.
+**The skill distribution shifts below the prior** if new entrants consistently lose early. Relevant wherever a population's composition changes over time, since the prior encodes an assumption about the incoming distribution that may stop holding.
 
 ## See Also
 
-- [[elo-rating-system]] · [[glicko-rating-system]] · [[bradley-terry-model]] · [[league-strength-rating]]
-- [[factor-graph]] · [[approximate-message-passing]] · [[expectation-propagation]] · [[gaussian-density-filtering]] · [[bayesian-inference]]
-- [[agent-based-simulation]] · [[google-research-football]] · [[proximal-policy-optimization]] · [[social-network-analysis]] · [[reinforcement-learning]] · [[observed-versus-optimal-decisions]]
-- [[ralf-herbrich]] · [[tom-minka]] · [[thore-graepel]] · [[atom-scott]] · [[microsoft-research]]
-- [[bayesian-true-skill-rating|TrueSkill Summary]] · [[ai-football-reinforcement-learning|Scott et al. Summary]]
+- [[elo-rating-system]] · [[glicko-rating-system]] · [[bradley-terry-model]] · [[bayesian-inference]] · [[expectation-propagation]] · [[message-passing]]
+- [[uncertainty-quantification]] · [[probabilistic-classification]] · [[predictive-validity]] · [[model-selection]] · [[selection-bias]]
+- [[microsoft-research]] · [[ralf-herbrich]] · [[tom-minka]] · [[thore-graepel]]
+- [[bayesian-true-skill-rating|Source Summary]]

@@ -1,54 +1,58 @@
 ---
 title: "Fully Convolutional Network"
 type: concept
-tags: [architecture, deep-learning, computer-vision, semantic-segmentation, probability-surface]
-sources: [raw/papers/expected_value_possession_framework.md, raw/papers/context-aggregation-dilated-convolutions.md]
-confidence: 0.8
+tags: [architecture, deep-learning, computer-vision, semantic-segmentation, convolution, representation-learning]
+sources: [raw/papers/context-aggregation-dilated-convolutions.md]
+confidence: 0.75
 provenance:
-  extracted: 45%
-  inferred: 50%
-  ambiguous: 5%
+  extracted: 25%
+  inferred: 40%
+  generated: 8%
+  imported: 25%
+  ambiguous: 2%
 lifecycle: draft
 created: 2026-07-27
-updated: 2026-07-27
+updated: 2026-08-14
 ---
 
 # Fully Convolutional Network
 
-A network built entirely from convolutional layers, with no fully-connected layers — so the output is a **spatial map** rather than a vector. Introduced for dense prediction by Long, Shelhamer & Darrell (2015).
+A network built entirely from convolutional layers, with no fully-connected layers — so the output is a **spatial map** rather than a vector. Introduced for dense prediction by Long, Shelhamer & Darrell (2015).^[imported]
 
 ## The Structural Change
 
-A conventional classification CNN ends by flattening its feature map and passing it through dense layers to a fixed-size output. Two things follow: the input size is fixed, and all spatial arrangement is destroyed at the flatten.
+A conventional classification CNN ends by flattening its feature map and passing it through dense layers to a fixed-size output. Two things follow: **the input size is fixed**, and **all spatial arrangement is destroyed at the flatten**.
 
-Removing the dense layers removes both constraints. The output becomes a grid whose cells correspond to input regions, so the network can answer a question *per location* instead of once per input.
+Removing the dense layers removes both constraints. The output becomes a grid whose cells correspond to input regions, so the network answers a question *per location* rather than once per input.
 
-The consequence that matters most is **weight sharing across positions**. The same filters run everywhere, so the network learns a function of local context rather than a lookup keyed to absolute position. That is what makes [[single-pixel-supervision]] possible: a gradient at one location updates the function governing all of them.
+The consequence that matters most is **weight sharing across positions**. The same filters run everywhere, so the network learns a function of local context rather than a lookup keyed to absolute position.
+
+> ### `weight-sharing-is-what-makes-sparse-supervision-viable`
+> **Because a convolutional network applies one function at every position, a gradient from a label at a single location updates the function governing all locations. That is why dense prediction can be learned from sparse labels at all — and why the same is not true of an architecture with position-specific parameters.**
+> ^[generated. rests-on: imported:fcn-weight-sharing]
 
 ## The Resolution Problem
 
-Pooling and strided convolution build large receptive fields but destroy resolution — and dense prediction needs both wide context and fine output. Three families of solution:
+Pooling and strided convolution build large receptive fields and destroy resolution. Dense prediction needs both. Three families of solution:
 
-| Approach | Mechanism | In this vault |
-|---|---|---|
-| Encoder–decoder with skips | Downsample, upsample, fuse across scales | [[soccermap]], original FCN |
-| [[dilated-convolution\|Dilated convolution]] | Expand receptive field without downsampling | [[context-aggregation-dilated-convolutions\|Yu & Koltun]] |
-| Multi-scale pyramids | Predict at several scales, fuse | [[feature-pyramid-network]] |
+| Approach | Mechanism |
+|---|---|
+| **Encoder–decoder with skips** | Downsample, upsample, fuse across scales — the original FCN and U-Net |
+| **[[dilated-convolution\|Dilated convolution]]** | Expand the receptive field in place, without downsampling |
+| **Multi-scale pyramids** | Predict at several scales and fuse — [[feature-pyramid-network\|FPN]] |
 
-These are complementary rather than exclusive. [[soccermap]] takes the first route — predictions at 1×, ½× and ¼×, upsampled and merged through linear 1×1 fusion layers — and Yu & Koltun's dilated-convolution work, already held in the vault, is the direct alternative to it.
+They are complementary rather than exclusive, and **rarely compared directly on the same task**, which makes the choice between them more conventional than evidenced. See `multi-scale-fusion-and-dilation-solve-the-same-problem-differently` on [[feature-pyramid-network]].
 
 ## Beyond Images
 
-Nothing about the architecture requires pixels. It requires a domain with a **regular grid and translation-equivariant structure**, where the same local pattern means the same thing wherever it appears.
+Nothing about the architecture requires pixels. It requires a domain with a **regular grid and translation-equivariant structure** — where the same local pattern means the same thing wherever it appears.
 
-A football pitch qualifies, which is the observation [[soccermap]] rests on: a defender two metres from the ball means much the same thing in either half. The pitch is discretised to $104 \times 68$, tracking data is rendered as stacked layers, and segmentation machinery applies unchanged.
+That condition is more restrictive than it sounds, and where it fails partially, the standard repair is instructive: **supply the broken symmetry as an input channel rather than changing the architecture.**
 
-The analogy is imperfect in one respect worth noting. Images are genuinely translation-invariant; pitches are not entirely — the goals break the symmetry. The framework handles this by including distance-to-goal and angle-to-goal as explicit input layers, letting the network recover the asymmetry from features rather than architecture.
+A spatial domain with a distinguished location — a target, a boundary, a source — is not fully translation-invariant. Adding distance-to-target and angle-to-target as explicit layers lets the network recover the asymmetry from features while keeping the convolutional structure intact. See [[feature-engineering]] and [[theory-based-modelling]].
 
 ## See Also
 
-- [[soccermap]] · [[probability-surface]] · [[single-pixel-supervision]]
-- [[semantic-segmentation]] · [[dilated-convolution]] · [[feature-pyramid-network]]
-- [[convolution]] · [[residual-connections]]
+- [[semantic-segmentation]] · [[dilated-convolution]] · [[feature-pyramid-network]] · [[convolution]] · [[residual-connections]]
+- [[representation-learning]] · [[feature-engineering]] · [[theory-based-modelling]] · [[siamese-network]] · [[conditional-gan]]
 - [[context-aggregation-dilated-convolutions|Dilated Convolutions Summary]]
-- [[expected-value-possession-framework|Source Summary]]

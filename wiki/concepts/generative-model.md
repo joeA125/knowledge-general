@@ -2,60 +2,70 @@
 title: "Generative Model"
 type: concept
 tags: [generative-model, machine-learning, deep-learning, density-estimation, vae, gan, autoregressive-model, counterfactual, representation-learning]
-sources: [raw/papers/variational-lossy-autoencoders.md, raw/papers/scoutgpt-generative-transformer-football-player-valuation.md, raw/papers/evaluation_creating_scoring_opportunities_trajectory_prediction.md]
-confidence: 0.85
+sources: [raw/papers/variational-lossy-autoencoders.md]
+confidence: 0.8
 provenance:
-  extracted: 40%
-  inferred: 55%
-  ambiguous: 5%
+  extracted: 30%
+  inferred: 40%
+  generated: 8%
+  imported: 20%
+  ambiguous: 2%
 lifecycle: draft
 created: 2026-07-27
-updated: 2026-07-27
+updated: 2026-08-14
 ---
 
 # Generative Model
 
-A model of the data distribution $p(x)$ itself, rather than only of a conditional $p(y|x)$. It can be *sampled from* — asked to produce new data — which is what distinguishes it from a discriminative model and what makes a whole class of downstream uses possible.
+A model of the data distribution $p(x)$ itself, rather than only a conditional $p(y \mid x)$. It can be **sampled from**, which distinguishes it from a discriminative model and enables a class of downstream uses.
 
 ## The Families
 
-The vault holds instances of each, and they differ mainly in how they make the likelihood tractable.
+They differ mainly in how they make the likelihood tractable, and each pays for it somewhere.
 
-| Family | Mechanism | Likelihood | In this vault |
+| Family | Mechanism | Likelihood | Cost |
 |---|---|---|---|
-| **[[autoregressive-model\|Autoregressive]]** | Chain rule: $p(x) = \prod_t p(x_t \mid x_{<t})$ | Exact | [[gpt]], [[large-event-model]], [[eventgpt]], [[scoutgpt]] |
-| **[[variational-autoencoder\|Latent variable / VAE]]** | Latent $z$, optimise an evidence lower bound | Bounded | [[variational-lossy-autoencoder]], VRNN, GVRNN |
-| **[[conditional-gan\|Adversarial]]** | Generator versus discriminator | Implicit | Pix2Pix, CycleGAN |
+| **[[autoregressive-model\|Autoregressive]]** | Chain rule: $p(x) = \prod_t p(x_t \mid x_{<t})$ | **Exact** | Sequential generation; errors compound |
+| **[[variational-autoencoder\|Latent variable]]** | Latent $z$, optimise a lower bound | **Bounded** | Blurred detail |
+| **[[conditional-gan\|Adversarial]]** | Generator versus discriminator | **Implicit** | No likelihood — hard to evaluate or compose |
 
-Autoregressive models give exact likelihoods and strong samples but generate sequentially, so long outputs are slow and errors compound — see [[teacher-forcing]]. VAEs give a usable latent space and fast sampling but blur detail. GANs give sharp samples and no likelihood at all, which makes them hard to evaluate and to compose.
+The third row's cost is easy to underrate. Without a likelihood a model cannot be compared to another on held-out data, cannot be used as a component in a larger probabilistic model, and cannot report how surprised it is by an input.
 
 ## What Generativity Buys
 
-Being able to sample is not the point in most vault applications. Three derived capabilities are.
+Sampling is rarely the point. Three derived capabilities usually are.
 
-**Counterfactuals.** A generative model conditioned on an intervenable entity can be asked what *would* have happened. [[scoutgpt]] substitutes a player into a lineup and regenerates the sequence; [[eventgpt]] substitutes and re-scores. Neither is possible with a discriminative model, which can only score what exists. See [[counterfactual-simulation]].
+**Counterfactuals.** A model conditioned on an intervenable entity can be asked what *would* have happened under a substitution. A discriminative model can only score what exists. See [[counterfactual-simulation]].
 
-**Reference behaviour.** A generative trajectory model trained on league-wide data produces what a *typical* player would have done, which becomes a baseline to measure deviation against. This is [[c-obso]]'s mechanism — and note it inverts the usual objective, since the model is wanted for its notion of *normal* rather than its accuracy. See [[counterfactual-baseline]] and [[imitation-learning]].
+**Reference behaviour.** A model trained on a population produces what a *typical* instance would look like, which becomes a baseline to measure deviation against. Note that this **inverts the usual objective** — the model is wanted for its notion of *normal* rather than its accuracy, and under a perfect model the deviation is identically zero. See [[counterfactual-baseline]] and [[imitation-learning]].
 
-**Multimodality.** A deterministic model asked to predict several plausible futures returns their average, which is often implausible — the midpoint between "runs left" and "runs right" is "stands still". Injecting a stochastic latent lets a model represent the modes separately. This is the specific failure that motivates VRNN over RNN in [[trajectory-prediction]], and the endpoint-error gap there is nearly an order of magnitude.
+**Multimodality.** A deterministic model asked for several plausible futures returns their **average**, which is frequently implausible — the midpoint of two valid options is often not a valid option. A stochastic latent lets the modes be represented separately rather than blended.
+
+> ### `averaging-over-modes-produces-invalid-outputs`
+> **Where a distribution is genuinely multimodal, a deterministic model minimising expected error returns a point between the modes. That point may be not merely unlikely but impossible, and nothing in the loss registers the difference.**
+> ^[generated. rests-on: imported:multimodal-regression]
 
 ## The Evaluation Problem
 
-Generative models are hard to evaluate, and the difficulty runs deeper than metric choice.
+Harder than metric choice, and the difficulty is structural.
 
-Likelihood is available for autoregressive models and bounded for latent-variable ones, absent for GANs. But high likelihood does not imply good samples, and good samples do not imply high likelihood — the two can be traded against each other, which [[variational-lossy-autoencoder|the VLAE work]] exploits deliberately by discarding local detail into the decoder.
+**High likelihood does not imply good samples, and good samples do not imply high likelihood.** The two can be traded deliberately — [[variational-lossy-autoencoders|VLAE]] exploits exactly this, pushing local detail into an autoregressive decoder so the latent carries global structure and the likelihood is spent elsewhere.
 
-For the vault's sports applications this bites hard, because the model is a *means*: [[scoutgpt]]'s value depends on its counterfactuals being right, not its perplexity being low. Held-out likelihood cannot tell you whether substituting a player produces a realistic alternative world. The substitute checks used — self-to-self reconstruction, out-of-sample transfer prediction — are weaker, and both are discussed on [[counterfactual-simulation]].
+That matters most where the model is a **means rather than an end**. If a generative model exists to produce counterfactuals, its value depends on those counterfactuals being right, not on its perplexity being low — and held-out likelihood cannot tell you whether an intervened-upon sample describes a realistic alternative world.
+
+The available substitutes — self-to-self reconstruction, out-of-sample intervention — are weaker and are discussed on [[counterfactual-simulation]].
 
 ## The Causal Caveat
 
-Worth stating plainly because the language invites the error: a generative model trained on observational data learns the **observational** distribution. Intervening and regenerating gives the correct causal answer only if the model captured the right dependency structure and nothing important is unmeasured.
+Worth stating plainly because the vocabulary invites the error.
 
-In football, observed performance is confounded with team quality, tactics and opposition. Conditioning on a lineup absorbs some of that; nothing guarantees the learned association is a causal effect. **"Generative" is not "causal"**, and treating the two as equivalent is the most common error in this literature.
+A generative model trained on observational data learns the **observational** distribution. Intervening on it and regenerating gives the correct causal answer only if the model captured the right dependency structure and nothing important is unmeasured — neither of which is typically checked.
+
+**"Generative" is not "causal."** Conditioning on an observed variable absorbs some confounding and guarantees nothing about the rest. See [[selection-bias]] for the version of this that arises before fitting, and [[domain-adaptation]] for the version that arises at deployment.
 
 ## See Also
 
-- [[autoregressive-model]] · [[variational-autoencoder]] · [[variational-lossy-autoencoder]] · [[conditional-gan]]
-- [[counterfactual-simulation]] · [[counterfactual-baseline]] · [[imitation-learning]] · [[trajectory-prediction]]
-- [[scoutgpt]] · [[eventgpt]] · [[large-event-model]] · [[c-obso]]
-- [[teacher-forcing]] · [[event-prediction]] · [[space-creation]]
+- [[autoregressive-model]] · [[variational-autoencoder]] · [[conditional-gan]] · [[transformer]] · [[gpt]]
+- [[counterfactual-simulation]] · [[counterfactual-baseline]] · [[imitation-learning]] · [[agent-based-simulation]]
+- [[kl-divergence]] · [[representation-learning]] · [[event-prediction]] · [[selection-bias]] · [[domain-adaptation]] · [[uncertainty-quantification]]
+- [[variational-lossy-autoencoders|VLAE Summary]]

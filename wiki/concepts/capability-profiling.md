@@ -1,84 +1,80 @@
 ---
 title: "Capability Profiling"
 type: concept
-tags: [evaluation, AI, cognitive-science, reasoning, model-decomposition, knowledge-intensive, single-source]
+tags: [evaluation, model-decomposition, predictive-validity, construct-validity, cognitive-science, interpretability, uncertainty-quantification]
 sources: [raw/papers/agi_definition.md]
 confidence: 0.8
 provenance:
-  extracted: 60%
+  extracted: 45%
   inferred: 30%
-  generated: 8%
-  imported: 2%
-  ambiguous: 0%
+  generated: 12%
+  imported: 11%
+  ambiguous: 2%
 lifecycle: draft
 created: 2026-07-27
-updated: 2026-07-27
+updated: 2026-08-14
 ---
 
 # Capability Profiling
 
-Evaluating a system by **decomposing capability into domains and reporting the vector**, rather than aggregating to a single score.
+Evaluating something by **decomposing its performance into components and reporting the vector**, rather than aggregating to a single score.
 
-[[agi-definition|Hendrycks et al. (2025)]] is the vault's instance: they ground a definition of AGI in Cattell–Horn–Carroll theory, split general intelligence into ten domains weighted equally at 10% each, and report a per-domain profile alongside the total.
+[[agi-definition|Hendrycks et al. (2025)]] make the case in its strongest form, grounding a definition of general intelligence in the Cattell–Horn–Carroll model from psychometrics — ten broad cognitive abilities, each measured separately, with the profile rather than the composite as the object of interest.
 
-## The Argument for the Vector
+## The Core Claim
 
-A composite score answers "how good", which is rarely the question that determines what to do next. The profile answers **"good at what, and bad at what"** — and the second is what identifies a bottleneck.
+> ### `aggregates-assume-substitutability`
+> **An aggregate is a fair summary only when its components are substitutes for one another. Where they are not, the composite is the least informative number available — and the one most likely to be quoted.**
+> ^[generated. rests-on: source:hendrycks-chc-decomposition]
 
-Their result makes the case. GPT-4 and GPT-5 score 27% and 57% overall, which reads as steady progress. The decomposition reads differently:
-
-| Domain | GPT-4 | GPT-5 |
-|---|---|---|
-| General knowledge | 8% | 9% |
-| Mathematical ability | 4% | 10% |
-| On-the-spot reasoning | 0% | 7% |
-| **Long-term memory storage** | **0%** | **0%** |
-| Speed | 3% | 3% |
-
-**Long-term memory storage sits at zero in both.** No aggregate would show that, and it is the finding the paper is built around — a capability that did not improve at all across a generation, hidden inside a number that nearly doubled.
+A single score implies that being better at one thing compensates for being worse at another. Sometimes true — for genuinely fungible components. Usually false, and the falseness is invisible in the number.
 
 ## Jaggedness
 
-The authors describe current systems as having a **"jagged" cognitive profile**: strong in knowledge-intensive domains, weak in foundational machinery.
+The property that determines whether an aggregate is safe.
 
-Jaggedness matters beyond description. A smooth profile means an aggregate is a fair summary; a jagged one means the aggregate is a weighted average over things that are not substitutes for one another. **The more jagged the profile, the more misleading the composite** — and nothing in a single score tells you which case you are in.
+- **A smooth profile** means the components are near each other, and the mean summarises them fairly.
+- **A jagged profile** means the aggregate is a weighted average over things that are not substitutes, and two systems with identical scores may be jagged in opposite directions.
 
-## Capability Contortions
+**Nothing in a single score tells you which case you are in.** That is the whole argument for reporting the vector: not that the composite is wrong, but that it cannot signal when it is misleading.
 
-The sharpest idea here.^[imported: the term is the source's; the generalisation below is not] The authors argue that workarounds masking a missing capability are not the capability:
+The held source's illustration is stark — a system may be at or above human level on most measured abilities while sitting near zero on long-term memory storage, and a composite obscures the gap entirely.
 
-- **Massive context windows** substitute for long-term memory *storage*
-- **[[retrieval-augmented-generation|RAG]]** substitutes for long-term memory *retrieval*
+## Workarounds Mask Missing Capabilities
 
-Both produce competent behaviour on tasks that would otherwise require the missing faculty, so both inflate an aggregate score while leaving the underlying deficit in place.
+The subtler failure, and the one that survives careful aggregate reporting.
 
-The general form is worth stating: **a workaround that succeeds on the benchmark and fails on the capability is invisible to any evaluation that only measures the benchmark.** That is a close cousin of the [[rare-event-proxy-targets|proxy-target problem]] — the proxy becomes the definition — arriving from the evaluation side rather than the training side.
+A system can substitute a workaround for a missing capability, scoring well on tasks that would otherwise expose the deficit. Large context windows standing in for memory storage; retrieval standing in for recall. The aggregate improves; the underlying capability does not exist.
 
-## The Same Lesson, Elsewhere in This Vault
+> ### `a-proxy-that-satisfies-the-evaluation-becomes-the-definition`
+> **Where an evaluation can be passed by a workaround, the workaround becomes what the metric measures. No amount of care in aggregating the components detects this, because the components are being measured correctly — it is the mapping from capability to task that has broken.**
+> ^[generated. rests-on: source:hendrycks-capability-contortions]
 
-Decomposition beating aggregation recurs here, independently derived each time:
+This is [[rare-event-proxy-targets|proxy substitution]] arriving from the evaluation side rather than the training side, and it is harder to catch because nothing was substituted deliberately.
 
-| Case | Composite | What the decomposition showed |
-|---|---|---|
-| [[receiving-efficiency]] | Defenders 1.06, midfielders 1.03 — near-identical | Split by receiving/interception, they do entirely different things |
-| [[intent-vs-outcome-valuation]] | VAEP conflates decision and execution | I-VAEP and O-VAEP separate them |
-| [[expected-possession-value]] | "EPV" as one term | Four distinct quantities under one name |
-| [[class-imbalance-evaluation]] | Brier alone | F1 exposes a classifier that finds nothing |
+The defence is an **external criterion** — something a proxy cannot satisfy by construction. See [[predictive-validity]].
 
-Four football cases and one AI case reaching the same structural point: **an aggregate is only a fair summary when its components are substitutes.** Where they are not, the composite is the least informative number available and the one most likely to be quoted.
+## Where Decomposition Helps Generally
 
-That is an argument for reporting profiles in the vault's own domain too. Almost every football framework here ends by summing to a per-90 rating — see the aggregation-step discussion on [[action-valuation]] — and none reports a per-domain profile of what the player is good and bad at, despite the machinery existing.
+The pattern is not specific to AI evaluation. Any composite over non-substitutable components has the same structure:
+
+| Composite hides | Decomposition reveals |
+|---|---|
+| Equal scores from opposite strengths | Which strengths |
+| A workaround compensating for a gap | The gap |
+| Variance across sub-populations | Which populations |
+| A metric conflating decision and execution | Which is weak |
+
+The last is worth stating separately: **where a measure conflates two abilities, no aggregation of it separates them.** The decomposition has to happen in the measurement, not in the reporting.
 
 ## Limitations
 
-- **Equal weighting is a choice, not a finding.** Ten domains at 10% each is defensible as a default and unjustified as a measurement. A different weighting produces a different total, and nothing here shows rankings are stable across weightings — the same objection the vault raises about [[free-parameters-load-bearing|asserted free parameters]].
-- **CHC theory is a model of *human* cognition.** Whether its factor structure is the right decomposition for a non-human system is assumed rather than argued.
-- **Scores are point estimates** with no reported uncertainty. See [[uncertainty-quantification]].
-- **Single source**, and a 30-author position paper rather than an experimental result.
+- **Equal weighting is a choice, not a finding.** A profile collapsed under any weighting is an aggregate again, and nothing shows rankings are stable across weightings. See [[model-selection]].
+- **Components must be separately valid.** Decomposing an unreliable measure produces several unreliable numbers — see [[split-half-reliability]] and `a-decomposition-is-only-as-good-as-its-least-validated-term` on [[structured-model-decomposition]].
+- **Profiles are harder to act on.** A vector does not rank, and ranking is what most decisions require. The composite persists because it answers the question being asked, badly, rather than not at all.
 
 ## See Also
 
-- [[agi-definition|Source Summary]] · [[retrieval-augmented-generation]] · [[scaling-laws]] · [[uncertainty-quantification]]
-- [[receiving-efficiency]] · [[intent-vs-outcome-valuation]] · [[expected-possession-value]] · [[class-imbalance-evaluation]]
-- [[rare-event-proxy-targets]] · [[structured-model-decomposition]] · [[free-parameters-load-bearing]] · [[action-valuation]]
-- [[predictive-validity]] · [[split-half-reliability]] · [[model-selection]]
+- [[structured-model-decomposition]] · [[predictive-validity]] · [[split-half-reliability]] · [[probability-calibration]] · [[model-selection]]
+- [[rare-event-proxy-targets]] · [[class-imbalance-evaluation]] · [[uncertainty-quantification]] · [[interpretability]] · [[selection-bias]]
+- [[agi-definition|Source Summary]]

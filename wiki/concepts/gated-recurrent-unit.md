@@ -1,60 +1,73 @@
 ---
 title: "Gated Recurrent Unit"
 type: concept
-tags: [deep-learning, rnn, sequence-modelling, architecture, reinforcement-learning, temporal-difference, sports-analytics]
-sources: [raw/papers/neural-machine-translation.md, raw/papers/action_valuation_football_agentic_reinforcement_learning.md]
-confidence: 0.9
+tags: [deep-learning, rnn, sequence-modelling, architecture, machine-translation, encoder-decoder-bottleneck, regularization]
+sources: [raw/papers/neural-machine-translation.md]
+confidence: 0.85
 provenance:
-  extracted: 68%
-  inferred: 24%
-  generated: 6%
-  imported: 0%
+  extracted: 55%
+  inferred: 26%
+  generated: 7%
+  imported: 10%
   ambiguous: 2%
 lifecycle: reviewed
 created: 2026-05-08
-updated: 2026-08-07
+updated: 2026-08-14
 ---
 
 # Gated Recurrent Unit
 
-The Gated Recurrent Unit (GRU; Cho et al., 2014a) is a gated recurrent neural network unit, similar to LSTM but with a simpler structure. It was used in both the encoder and decoder of the [[neural-machine-translation|Bahdanau attention model]].
+A gated recurrent unit (Cho et al., 2014), simpler than the [[lstm|LSTM]] and comparable in capability. Introduced alongside — and used in both encoder and decoder of — the [[neural-machine-translation|Bahdanau attention model]].
 
 ## Mechanism
 
-The hidden state update is:
-
 $$s_i = (1 - z_i) \circ s_{i-1} + z_i \circ \tilde{s}_i$$
 
-where:
-- **Update gate** $z_i = \sigma(W_z e(y_{i-1}) + U_z s_{i-1} + C_z c_i)$ controls how much of the previous state to retain.
-- **Reset gate** $r_i = \sigma(W_r e(y_{i-1}) + U_r s_{i-1} + C_r c_i)$ controls how much of the previous state feeds into the candidate.
-- **Candidate** $\tilde{s}_i = \tanh(W e(y_{i-1}) + U [r_i \circ s_{i-1}] + C c_i)$.
+| Gate | Controls |
+|---|---|
+| **Update** $z_i$ | How much of the previous state to retain |
+| **Reset** $r_i$ | How much of the previous state feeds the candidate |
+| **Candidate** $\tilde{s}_i$ | The proposed new content, $\tanh(W e + U[r_i \circ s_{i-1}] + C c_i)$ |
+
+The update gate does the work that the LSTM splits between forget and input gates. Because $z_i$ appears as both $(1-z_i)$ and $z_i$, retention and replacement are **forced to trade off** rather than being independently controllable — which is the substantive simplification, not merely a parameter saving.
 
 ## Relation to LSTM
 
-GRUs combine the LSTM's forget and input gates into a single update gate, and merge the cell state and hidden state. This gives fewer parameters while maintaining the ability to learn long-term dependencies through multiplicative gating.
+| | LSTM | GRU |
+|---|---|---|
+| Gates | Forget, input, output | Update, reset |
+| State | Cell **and** hidden, separate | **Merged** |
+| Parameters | More | **~25% fewer** |
+| Typical performance | Comparable | Comparable |
 
-## Why It Persists in Small-Data Settings
+No consistent winner across tasks. **The GRU is preferred where parameters are the binding constraint and the LSTM where the extra control helps**, and which applies is usually settled empirically rather than argued.
 
-> **Added 2026-08-07.** This page had covered only the machine-translation origin. The GRU's more interesting recent role in this vault is elsewhere.
+## Why Fewer Parameters Is Sometimes the Whole Argument
 
-[[action-valuation-multi-agent-reinforcement-learning|Nakahara et al. (2023)]] use a **single 64-unit GRU layer with ReLU** as the value network for ten [[multi-agent-reinforcement-learning|per-player RL agents]], taking a 92-dimensional state plus a 14-dimensional one-hot action per timestep and emitting 14 Q-values.
+The parameter difference is a footnote at scale and decisive at small scale.
 
-That is a very small network in 2023, and the choice is instructive rather than dated. The training set is **1,669 possession sequences**. Against that, the [[transformer]] would be badly over-parameterised — the fewer-parameters property above stops being a footnote and becomes the reason for the choice. Compare [[nmstpp]], which does use a Transformer on football events, on a corpus of a different order.
+Where training data is limited — thousands of sequences rather than millions — a model's capacity is bounded by what will not overfit rather than by what the task needs. In that regime a [[transformer]] is badly over-parameterised, an LSTM is marginal, and a small GRU is the right size.
 
-The vault's general form of this observation is on [[theory-based-modelling]] and [[handcrafted-features-rule]]: **at football data scale, architecture capacity is usually not the binding constraint.** Nakahara et al. also apply $L_1$ [[regularization|regularisation]] to weights and biases explicitly to prevent overfitting "on the relatively small demonstration dataset".
+> ### `architecture-choice-tracks-data-scale-more-than-task-difficulty`
+> **At small data scale the binding constraint is overfitting rather than expressiveness, so the architecture with fewest parameters that can represent the task often wins outright. The same task at larger scale reverses the ordering.**
+> ^[generated. rests-on: imported:small-data-architecture-practice]
 
-### The recurrence is doing memory work, not just sequence work
+See [[regularization]] and [[theory-based-modelling]] for the two other responses to the same constraint — penalising weights, and encoding structure rather than learning it.
 
-Worth separating, because it is easy to miss. In a [[temporal-difference-learning|TD]] setting the GRU's hidden state serves a second purpose beyond modelling the sequence: it carries information across the bootstrap, so $Q(s_{t+1}, a_{t+1})$ is conditioned on the whole possession so far rather than on the instantaneous state alone.
+## Recurrence as Memory, Not Only Sequence Modelling
 
-That partly compensates for a state vector containing only current positions and velocities — no history, no possession phase, no scoreline. It also means the framework's effective credit horizon is set by **how far the GRU actually propagates signal**, which nobody reports. Since the same paper sets its discount factor to 1, recurrence depth is the *only* thing performing temporal credit assignment there. See [[temporal-discounting]].
+Worth separating because it is easy to miss. A recurrent hidden state serves two distinct purposes:
 
-Standard TD stabilisers — target networks, replay buffers — are absent; the recurrence over whole possessions is what stands in for them. The companion paper [[adaptive-action-supervision-multi-agent-rl|Fujii et al.]] uses the full stabiliser stack and **no recurrence at all**, which is the clearest illustration available that the two are substitutes for the same problem. See [[deep-q-network]].
+1. **Modelling the sequence** — the obvious one.
+2. **Carrying state across a computation** that would otherwise see only the current input.
+
+The second matters in [[temporal-difference-learning|bootstrapped value learning]], where the successor estimate can be conditioned on accumulated history rather than on the instantaneous state alone. **That partly substitutes for the [[deep-q-network|DQN]] stabiliser stack** — a recurrent value network and a target network address overlapping problems by different means.
+
+Where recurrence performs this role, the effective horizon is set by **how far the hidden state actually propagates signal**, which is almost never measured or reported.
 
 ## See Also
 
-- [[bidirectional-rnn]] · [[lstm]] · [[recurrence]] · [[encoder-decoder]] · [[additive-attention]] · [[transformer]]
-- [[temporal-difference-learning]] · [[deep-q-network]] · [[multi-agent-reinforcement-learning]] · [[reinforcement-learning]] · [[regularization]]
-- [[trajectory-prediction]] · [[nmstpp]] · [[theory-based-modelling]] · [[representation-learning]] · [[temporal-discounting]]
-- [[neural-machine-translation|Bahdanau et al. Summary]] · [[action-valuation-multi-agent-reinforcement-learning|Nakahara et al. Summary]]
+- [[lstm]] · [[recurrence]] · [[bidirectional-rnn]] · [[encoder-decoder]] · [[encoder-decoder-bottleneck]] · [[additive-attention]] · [[transformer]]
+- [[temporal-difference-learning]] · [[deep-q-network]] · [[reinforcement-learning]] · [[regularization]] · [[model-selection]]
+- [[neural-temporal-point-process]] · [[representation-learning]] · [[theory-based-modelling]]
+- [[neural-machine-translation|Bahdanau et al. Summary]]

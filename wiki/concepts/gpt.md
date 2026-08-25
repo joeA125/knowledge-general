@@ -2,7 +2,7 @@
 title: "GPT"
 type: concept
 tags: [transformer, language-modelling, autoregressive-model, deep-learning, pre-training, transfer-learning, representation-learning, tokenization]
-sources: [raw/papers/language_understanding_gpt.md, raw/papers/scoutgpt-generative-transformer-football-player-valuation.md]
+sources: [raw/papers/language_understanding_gpt.md]
 confidence: 0.95
 provenance:
   extracted: 80%
@@ -10,7 +10,7 @@ provenance:
   ambiguous: 5%
 lifecycle: reviewed
 created: 2026-07-07
-updated: 2026-07-24
+updated: 2026-08-14
 ---
 
 # GPT
@@ -33,7 +33,7 @@ Task-specific input transformations convert structured inputs into token sequenc
 - **Similarity:** Both orderings processed, representations added element-wise
 - **Multiple choice:** Each answer concatenated with context separately
 
-Only one linear output layer $W_y$ is added per task. An auxiliary LM loss ($\lambda = 0.5$) during fine-tuning improves generalisation — an early instance of the [[multi-task-learning]] pattern.
+Only one linear output layer $W_y$ is added per task. An auxiliary LM loss ($\lambda = 0.5$) during fine-tuning improves generalisation — an early instance of an auxiliary objective shaping the primary one.
 
 ## Key Results
 
@@ -48,20 +48,20 @@ SOTA on 9/12 benchmarks: Story Cloze +8.9% (86.5%), RACE +5.7% (59.0%), MultiNLI
 
 ## The Architecture Travels Beyond Language
 
-The decoder-only GPT design has become a general-purpose sequence architecture, applied wherever data can be [[tokenization|tokenised]] into a discrete sequence.
+The decoder-only GPT design has become a general-purpose sequence architecture, applied wherever data can be [[tokenization|tokenised]] into a discrete sequence — event streams, symbolic music, biological sequences, action traces.
 
-[[scoutgpt]] is an instructive case: it uses **nanoGPT**, a compact GPT-2 implementation, essentially unmodified — pre-LayerNorm blocks, causal multi-head self-attention, GELU MLP — to generate *football match events*. What changes is entirely outside the backbone:
+The substantive point is that **the backbone typically needs no modification.** What changes is entirely outside it:
 
-| Component | Language | ScoutGPT |
+| Component | Language | A non-language domain |
 |---|---|---|
-| Tokens | BPE subwords | 10 atomic tokens per event |
-| Context | Preceding text | 56-token lineup and match-state block |
-| Objective | Next-token CE | Next-token CE + auxiliary value heads |
-| Decoding | Free sampling | [[constrained-decoding\|Validity-masked]] |
+| Tokens | BPE subwords | Domain-specific atomic units |
+| Context | Preceding text | A conditioning block |
+| Objective | Next-token cross-entropy | Often plus auxiliary heads |
+| Decoding | Free sampling | Often masked to enforce validity |
 
-That the backbone needs no modification is the substantive point. The transformer's contribution is a generic mechanism for modelling dependencies in token sequences; domain adaptation happens in tokenization, conditioning, objective, and decoding.
+The Transformer contributes a generic mechanism for modelling dependencies in token sequences; **domain adaptation happens in tokenization, conditioning, objective and decoding**, not in the architecture. That is why the same implementation serves domains with nothing else in common, and why [[tokenization]] is the consequential choice rather than an implementation detail.
 
-The [[large-event-model]] programme takes this further, pursuing a foundation-model recipe for football — though with a data budget several orders of magnitude smaller than language, which [[scaling-laws]] suggest is a real constraint.
+The limit is data. [[scaling-laws]] describe how far the paradigm reaches for a given corpus size, and domains with corpora orders of magnitude smaller than text should not expect the same returns.^[imported]
 
 ## Impact
 
@@ -69,13 +69,6 @@ GPT established that left-to-right Transformer LMs could transfer effectively ac
 
 ## See Also
 
-- [[language-understanding-gpt|Source Summary]]
-- [[pre-train-then-fine-tune]]
-- [[bert]]
-- [[transformer]]
-- [[tokenization]]
-- [[scoutgpt]]
-- [[large-event-model]]
-- [[autoregressive-model]]
-- [[scaling-laws]]
-- [[rlhf]]
+- [[transformer]] · [[bert]] · [[pre-train-then-fine-tune]] · [[transfer-learning]] · [[tokenization]]
+- [[autoregressive-model]] · [[masked-language-model]] · [[scaling-laws]] · [[rlhf]] · [[generative-model]]
+- [[representation-learning]] · [[chain-of-thought]] · [[react]] · [[language-understanding-gpt|Source Summary]]

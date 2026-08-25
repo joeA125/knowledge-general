@@ -1,8 +1,8 @@
 ---
 title: "Attention Mechanism"
 type: concept
-tags: [attention, deep-learning, sequence-modelling, interpretability]
-sources: [raw/papers/attention-is-all-you-need.md, raw/papers/neural-machine-translation.md, raw/papers/pointer-networks.md, raw/papers/transformer-point-process-football-event-modelling.md]
+tags: [attention, deep-learning, sequence-modelling, interpretability, transformer, architecture]
+sources: [raw/papers/attention-is-all-you-need.md, raw/papers/neural-machine-translation.md, raw/papers/pointer-networks.md]
 confidence: 0.9
 provenance:
   extracted: 70%
@@ -10,7 +10,7 @@ provenance:
   ambiguous: 5%
 lifecycle: reviewed
 created: 2026-05-07
-updated: 2026-07-23
+updated: 2026-08-14
 ---
 
 # Attention Mechanism
@@ -43,22 +43,25 @@ The [[transformer]] uses attention in three ways:
 
 Beyond their computational role, attention weights are inspectable, and can be read as a diagnostic on the model's *inputs* rather than its internals.
 
-[[transformer-point-process-football-event-modelling|Yeung et al. (2023)]] use the last row of the self-attention matrix — the contribution of each historical event to the final history representation — to test whether their 40-event context window is appropriately sized. Weights lay between 0.01 and 0.06 with **no trend across the window**, which they take as evidence the window is neither too short (weights would pile up at the recent end, implying more history could help) nor too long (distant events would receive negligible weight).
+Where a fixed-size context window feeds a self-attention encoder, the **distribution of weights across that window** tests whether the window is correctly sized. Weights piling up at the recent end suggest the window is too short and more history would help; distant positions receiving negligible weight suggest it is longer than the model can use. A flat distribution with no trend indicates neither.
 
-This is a cheap and general check on context-length hyperparameters, applicable wherever a fixed-size window feeds a self-attention encoder.
+> ### `attention-weights-diagnose-window-length`
+> **The attention distribution over a fixed context window is a cheap test of whether the window is correctly sized — a trend toward either end indicates a misspecified horizon. The check costs nothing beyond reading a matrix the model already computes.**
+> ^[generated. rests-on: imported:attention-window-diagnostics]
 
-A caveat worth keeping: attention weights are widely used as [[interpretability|interpretability]] evidence, but the broader literature is divided on whether they constitute genuine explanation of model behaviour. The diagnostic use above is more defensible than causal claims, since it asks only whether the model *distributes* attention across the available window rather than what any individual weight means.
+This matters because context length is otherwise an **asserted parameter**, set by convention and rarely varied. See [[model-selection]].
+
+A caveat worth keeping: attention weights are widely used as [[interpretability|interpretability]] evidence, and the literature is divided on whether they constitute genuine explanation. **The diagnostic use is more defensible than the explanatory one**, since it asks only whether the model *distributes* attention across the window, not what any individual weight means. See `diagnostic-use-survives-what-explanatory-use-does-not` on [[interpretability]].
 
 ## Beyond Language
 
-Attention is architecture-agnostic about what a "sequence" contains. In this vault it appears over word sequences ([[transformer]], [[additive-attention]]), sets ([[read-process-write]]), memory locations ([[neural-turing-machine]]), image patches for retrieval ([[siamese-network]] in calibration), and football match events ([[nmstpp]]) — the mechanism is unchanged; only the tokens differ.
+Attention is agnostic about what a "sequence" contains. It appears over word sequences ([[transformer]], [[additive-attention]]), sets ([[read-process-write]]), memory locations ([[neural-turing-machine]]), image patches for retrieval ([[siamese-network]]), and continuous-time event streams ([[neural-temporal-point-process]]) — the mechanism is unchanged; only the tokens differ.
+
+Self-attention over a set with no positional encoding is [[message-passing]] on a fully-connected graph, which places it in the same family as [[graph-neural-network|GNNs]].
 
 ## See Also
 
-- [[additive-attention]]
-- [[scaled-dot-product-attention]]
-- [[multi-head-attention]]
-- [[pointer-network]]
-- [[encoder-decoder-bottleneck]]
-- [[neural-temporal-point-process]]
-- [[transformer]]
+- [[additive-attention]] · [[scaled-dot-product-attention]] · [[multi-head-attention]] · [[pointer-network]] · [[transformer]]
+- [[encoder-decoder-bottleneck]] · [[neural-temporal-point-process]] · [[message-passing]] · [[graph-neural-network]]
+- [[interpretability]] · [[model-selection]] · [[lstm]] · [[gated-recurrent-unit]]
+- [[attention-is-all-you-need|Transformer Summary]] · [[neural-machine-translation|Bahdanau Summary]] · [[pointer-networks|Pointer Networks Summary]]

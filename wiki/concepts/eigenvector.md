@@ -38,23 +38,26 @@ A matrix $A$ represents a linear transformation that generally both stretches an
 - The eigenvalues of a positive semi-definite matrix (e.g., a covariance matrix) are all $\geq 0$.
 - An $n \times n$ matrix has at most $n$ linearly independent eigenvectors.
 
-## Connections to Vault Concepts
+## Where It Appears
 
-### Singular Value Decomposition (SVD)
-SVD decomposes any matrix as $A = U\Sigma V^T$, where $U$ and $V$ contain eigenvectors of $AA^T$ and $A^T A$ respectively. SVD is used in the **Direct Linear Transform (DLT)** for [[homography]] estimation — solving for the [[camera-calibration|camera projection]] that best maps field correspondences.
+### Singular Value Decomposition
+SVD decomposes any matrix as $A = U\Sigma V^T$, where $U$ and $V$ contain eigenvectors of $AA^T$ and $A^T A$ respectively. It underpins the **Direct Linear Transform**, the standard least-squares method for estimating a [[homography]] from point correspondences — the smallest singular vector gives the solution to a homogeneous system.
 
-### Principal Component Analysis (PCA)
-PCA finds the eigenvectors of the data's covariance matrix. The eigenvector with the largest eigenvalue is the first principal component — the direction of maximum variance. This is used implicitly in dimensionality reduction techniques (e.g., the UMAP step in the [[detection-tracking-football-broadcast-footage|Tshiani detection/tracking pipeline]]).
+### Principal Component Analysis
+PCA finds the eigenvectors of a data covariance matrix. The eigenvector with the largest eigenvalue is the direction of maximum variance.
+
+Worth contrasting with [[non-negative-matrix-factorization|NMF]], which decomposes the same kind of matrix under a different constraint. **PCA's orthogonality gives uniqueness and components that may cancel; NMF's non-negativity gives interpretable parts and loses uniqueness.** The choice is about what the components are meant to mean, not about fit quality.
 
 ### Covariance and Bayesian Methods
-The [[trueskill]] rating system and [[expectation-propagation]] work with Gaussian distributions parameterised by mean vectors and covariance matrices. The eigenvectors of a covariance matrix define the principal axes of the uncertainty ellipsoid — the directions along which uncertainty is greatest or smallest.
+[[trueskill]] and [[expectation-propagation]] work with Gaussians parameterised by mean vectors and covariance matrices. **The eigenvectors of a covariance matrix are the principal axes of the uncertainty ellipsoid** — the directions along which uncertainty is greatest and smallest.
 
-### Attention as Weighted Combination
-The [[attention-mechanism]] computes weighted combinations of value vectors: $\text{Attention}(Q, K, V) = \text{softmax}(QK^T/\sqrt{d_k})V$. While not an eigendecomposition, this shares the linear-algebraic flavour of projecting data along informative directions — analogous to how PCA projects data along eigenvectors.
+That geometry is what a scalar summary of uncertainty discards: two distributions with the same total variance can be uncertain in entirely different directions. See [[uncertainty-quantification]].
+
+### Spectral Methods More Broadly
+Graph Laplacian eigenvectors underpin spectral clustering and spectral embeddings; the leading eigenvector of a transition matrix gives a stationary distribution. **Wherever a problem reduces to "find the directions in which this operator acts simply", eigendecomposition is the tool.**^[imported]
 
 ## See Also
 
+- [[non-negative-matrix-factorization]] · [[representation-learning]] · [[homography]] · [[camera-calibration]]
+- [[trueskill]] · [[expectation-propagation]] · [[uncertainty-quantification]] · [[bayesian-inference]] · [[attention-mechanism]]
 - [[eigenvectors-explained|Source Summary]]
-- [[homography]]
-- [[trueskill]]
-- [[attention-mechanism]]

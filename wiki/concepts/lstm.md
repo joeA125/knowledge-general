@@ -2,7 +2,7 @@
 title: "Long Short-Term Memory"
 type: concept
 tags: [deep-learning, rnn, lstm, architecture, sequence-modelling]
-sources: [raw/papers/rnn-regularisation.md, raw/papers/neural-machine-translation.md, raw/papers/transformer-point-process-football-event-modelling.md]
+sources: [raw/papers/rnn-regularisation.md, raw/papers/neural-machine-translation.md]
 confidence: 0.9
 provenance:
   extracted: 60%
@@ -10,7 +10,7 @@ provenance:
   ambiguous: 10%
 lifecycle: draft
 created: 2026-05-08
-updated: 2026-07-23
+updated: 2026-08-14
 ---
 
 # Long Short-Term Memory (LSTM)
@@ -37,39 +37,34 @@ The cell state $c_t$ provides a highway for gradients to flow across many time s
 
 ## LSTM vs Transformer for Sequence Encoding
 
-The [[transformer]] displaced recurrent encoders for most long-sequence tasks, but the tradeoff is narrower than the displacement suggests. The recurring empirical finding is that **LSTMs remain competitive or marginally better on accuracy, while being substantially slower to train**, because their gradient computation is inherently sequential where self-attention parallelises.
+The [[transformer]] displaced recurrent encoders for most long-sequence tasks, but the trade-off is narrower than the displacement suggests. The recurring empirical finding is that **LSTMs remain competitive or marginally better on accuracy while being substantially slower to train**, because their gradient computation is inherently sequential where self-attention parallelises.
 
-[[transformer-point-process-football-event-modelling|Yeung et al. (2023)]] give a clean measurement on football event sequences, holding everything else fixed:
+Typical measured differences, holding everything else fixed, put the LSTM slightly ahead on loss and the Transformer roughly **2–3× faster to train**, often at a fraction of the parameter count.^[imported: reported across the sequence-modelling and NTPP literature; not established by any held source]
 
-| Encoder | Total loss | Training time |
-|---|---|---|
-| Uni-LSTM | **4.51** | 129 min |
-| Transformer | 4.57 | **47 min** |
+> ### `recurrence-persists-where-sequences-are-short`
+> **The Transformer's advantage is parallelisation across long sequences. Where sequences are short, training budget is tight relative to inference budget, or parameter count is constrained by data scale, recurrent encoders remain competitive or better.**
+> ^[generated. rests-on: imported:lstm-transformer-comparisons]
 
-The LSTM wins on loss by 0.06; the transformer trains **2.7× faster**. The same pattern was reported by [[seq2event|Simpson et al. (2022)]] and is noted across the [[neural-temporal-point-process|NTPP]] literature.
-
-This is why LSTMs persist in settings where sequences are short, training budget is tight relative to inference budget, or parameter count matters — the LSTM variant above used 4K parameters against the transformer's 13K.
+The condition matters: a window of tens of steps is not a document of thousands of tokens, and the parallelisation advantage scales with the gap. See [[neural-temporal-point-process]], where short event histories make this the live question rather than a settled one.
 
 ## Relation to GRU
 
-The [[gated-recurrent-unit]] (Cho et al., 2014) simplifies the LSTM by merging the forget and input gates into a single update gate and combining the cell and hidden states, yielding fewer parameters.
+The [[gated-recurrent-unit]] simplifies the LSTM by merging the forget and input gates into a single update gate and combining the cell and hidden states, yielding roughly 25% fewer parameters. At small data scale that difference decides the choice; at large scale it rarely does. See [[gated-recurrent-unit]].
 
 ## Regularisation
 
-Standard [[dropout]] applied to recurrent connections harms LSTMs. [[dropout-for-rnns|Zaremba et al. (2014)]] showed dropout should only be applied to non-recurrent (inter-layer) connections.
+Standard [[dropout]] applied to recurrent connections harms LSTMs — the noise compounds across timesteps and destroys the long-term memory the cell state exists to preserve. [[dropout-for-rnns|Zaremba et al.]] showed it should be applied to non-recurrent connections only.
 
-## Uses in This Vault
+## Where It Is Used
 
-- Sequence transduction and machine translation ([[encoder-decoder]], [[neural-machine-translation]])
-- Controller for the [[neural-turing-machine]], where internal LSTM memory complements external addressable memory
-- History encoding in [[neural-temporal-point-process|NTPP]] models, as one of the standard choices alongside GRU and transformer encoders
-- Microtransition and sequence models across sports analytics
+- Sequence transduction and machine translation — [[encoder-decoder]], [[neural-machine-translation]]
+- Controller for the [[neural-turing-machine]], where internal memory complements external addressable memory
+- History encoding in [[neural-temporal-point-process|NTPP]] models, alongside GRU and Transformer encoders
+- Value networks in [[temporal-difference-learning|bootstrapped RL]], where the hidden state carries information across the bootstrap
 
 ## See Also
 
-- [[transformer]]
-- [[gated-recurrent-unit]]
-- [[dropout-for-rnns]]
-- [[bidirectional-rnn]]
-- [[encoder-decoder]]
-- [[neural-temporal-point-process]]
+- [[transformer]] · [[gated-recurrent-unit]] · [[recurrence]] · [[bidirectional-rnn]] · [[encoder-decoder]] · [[encoder-decoder-bottleneck]]
+- [[dropout-for-rnns]] · [[dropout]] · [[regularization]] · [[attention-mechanism]]
+- [[neural-temporal-point-process]] · [[event-prediction]] · [[temporal-difference-learning]] · [[model-selection]]
+- [[rnn-regularisation|Zaremba et al. Summary]] · [[neural-machine-translation|Bahdanau Summary]]
