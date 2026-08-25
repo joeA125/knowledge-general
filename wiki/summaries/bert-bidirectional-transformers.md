@@ -42,9 +42,9 @@ Randomly masks 15% of tokens; of those, 80% become `[MASK]`, 10% a random token,
 
 This solves a real obstacle: standard LMs must run one direction, since bidirectional conditioning would let each word **see itself**. Masking removes the shortcut and forces the representation to be built from context.
 
-That is the same mechanism the vault records elsewhere as **a representation learns what it is not given for free** — [[scoutgpt]] masks position tokens and gets better [[player-embedding|player embeddings]]; [[variational-lossy-autoencoder|VLAE]] restricts its decoder to force global structure into the latent. See [[representation-learning]].
+That is the same mechanism the vault records as **a representation learns what it is not given for free** — see [[representation-learning]], where [[variational-lossy-autoencoders|VLAE's]] receptive-field restriction is the architectural version of the same idea.
 
-The 80/10/10 split is itself a mitigation: `[MASK]` never appears at fine-tuning time, so training exclusively on it would create a train/test mismatch — a mild form of the [[teacher-forcing|exposure-bias]] problem.
+The 80/10/10 split is itself a mitigation: `[MASK]` never appears at fine-tuning time, so training exclusively on it would create a train/test mismatch — a mild form of the [[teacher-forcing|exposure-bias]] problem, **anticipated and priced in** rather than discovered later.
 
 ### Next Sentence Prediction
 
@@ -66,18 +66,18 @@ Pre-training data: BooksCorpus (800M words) + English Wikipedia (2,500M). 1M ste
 
 1. **Bidirectionality is crucial.** Removing MLM (left-to-right only, like GPT) costs 9.2 points on MRPC and 10.7 F1 on SQuAD.
 2. **NSP matters**, though less: QNLI −3.5%, MNLI −0.5%.
-3. **Model size helps monotonically**, 3→6→12→24 layers, **even on tiny datasets** (3.6K examples). Notable because it runs against the sample-size logic the vault records elsewhere — [[gradient-boosting|tree ensembles]] and [[xsot|small MLPs]] both degrade with added capacity on small data. The difference is that BERT's capacity is *pre-trained elsewhere* and only transferred, so the small dataset never has to constrain it. See [[transfer-learning]].
+3. **Model size helps monotonically**, 3→6→12→24 layers, **even on tiny datasets** (3.6K examples). Notable because it runs against the usual sample-size logic — models trained from scratch typically degrade with added capacity on small data. The difference is that BERT's capacity is *pre-trained elsewhere* and only transferred, so the small dataset never has to constrain it. See [[transfer-learning]] and `architecture-choice-tracks-data-scale-more-than-task-difficulty` on [[gated-recurrent-unit]].
 4. **Feature-based use is nearly as good.** Concatenating the top four hidden layers as fixed features reaches 96.1 F1 on CoNLL NER, 0.3 behind full fine-tuning.
 
 ## Impact
 
 BERT established bidirectional pre-training as superior for *understanding* tasks, complementing GPT's generative strengths — and the two together fixed [[pre-train-then-fine-tune]] as the dominant paradigm. Spawned RoBERTa, ALBERT, DeBERTa and DistilBERT.
 
-The division has held: encoder-only models for discriminative work, decoder-only for generative. The vault's football-as-language line ([[large-event-model]], [[scoutgpt]]) follows the *decoder* branch, because its questions are generative — simulate what happens next — rather than discriminative.
+The division has held: **encoder-only models for discriminative work, decoder-only for generative**, with encoder-decoder architectures retained where a genuine sequence-to-sequence mapping is needed. Which branch a domain follows is determined by whether its questions are generative — simulate what happens next — or discriminative.
 
 ## See Also
 
 - [[bert]] · [[masked-language-model]] · [[pre-train-then-fine-tune]] · [[transformer]] · [[tokenization]]
-- [[representation-learning]] · [[transfer-learning]] · [[teacher-forcing]] · [[player-embedding]] · [[scaling-laws]]
+- [[representation-learning]] · [[transfer-learning]] · [[teacher-forcing]] · [[scaling-laws]] · [[gpt]]
 - [[jacob-devlin]] · [[google-research]]
-- [[language-understanding-gpt|GPT]] · [[scaling-neural-language-models|Scaling Laws]] · [[training-lm-follow-instructions-with-human-feedback|InstructGPT]]
+- [[language-understanding-gpt|GPT Summary]] · [[scaling-neural-language-models|Scaling Laws Summary]] · [[training-lm-follow-instructions-with-human-feedback|InstructGPT Summary]]

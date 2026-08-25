@@ -42,7 +42,7 @@ Rather than task-specific architectures, GPT converts every task into a token se
 
 Only one new linear output layer per task. An auxiliary LM loss ($\lambda = 0.5$) during fine-tuning improves generalisation and convergence.
 
-**The framing move is the durable part**: reshaping the *input* rather than the *model* so one architecture serves many tasks. The same manoeuvre appears in [[large-event-model|football-as-language]] work, where matches become token sequences — see [[tokenization]] for the representational cost when the underlying data is structured tuples rather than words.
+**The framing move is the durable part**: reshaping the *input* rather than the *model*, so one architecture serves many tasks. The same manoeuvre recurs wherever a non-language domain is reformulated as a token sequence — see [[tokenization]] for the representational cost when the underlying data is structured tuples rather than words.
 
 ## Key Results
 
@@ -57,14 +57,14 @@ Only one new linear output layer per task. An auxiliary LM loss ($\lambda = 0.5$
 
 - **Pre-training is essential** — without it, average performance drops 14.8%.
 - **Transformer beats LSTM** — swapping in a single-layer 2048-unit [[lstm]] costs 5.6 points, which the authors attribute to the Transformer's structured memory aiding transfer.
-- **The auxiliary LM objective helps on large datasets** (NLI, QQP) and not on smaller ones — a sample-size-dependent result of the same shape as [[gradient-boosting|the vault's tree-ensemble finding]]: an addition that regularises at scale can overfit below it.
+- **The auxiliary LM objective helps on large datasets** (NLI, QQP) and not on smaller ones — an addition that regularises at scale can overfit below it. See [[model-selection]].
 - **Layer transfer is monotone** — each additional Transformer layer transferred improves performance, up to all 12.
 
 ## Zero-Shot Behaviour
 
-Zero-shot performance on sentiment, Winograd schemas, linguistic acceptability and QA improves steadily *as pre-training progresses*, without any supervised fine-tuning — evidence that the LM acquires task-relevant capability as a by-product of language modelling. See [[zero-shot-learning]].
+Zero-shot performance on sentiment, Winograd schemas, linguistic acceptability and QA improves steadily *as pre-training progresses*, without any supervised fine-tuning — evidence that the LM acquires task-relevant capability as a by-product of language modelling.
 
-This is the same structural observation the vault records for [[event-prediction]]: **a model trained to forecast produces evaluative capability as a by-product**, needing no task labels. Two literatures, one pattern.
+This is a structural observation that generalises: **a model trained to forecast produces evaluative capability as a by-product**, needing no task labels. The same pattern appears wherever a predictive model is repurposed as a measuring instrument — see [[event-prediction]] and [[counterfactual-baseline]].
 
 ## Impact
 
@@ -73,6 +73,6 @@ GPT established that left-to-right Transformer LMs pre-trained on large corpora 
 ## See Also
 
 - [[gpt]] · [[pre-train-then-fine-tune]] · [[transformer]] · [[autoregressive-model]] · [[masked-language-model]]
-- [[tokenization]] · [[zero-shot-learning]] · [[scaling-laws]] · [[representation-learning]] · [[large-event-model]]
+- [[tokenization]] · [[scaling-laws]] · [[representation-learning]] · [[transfer-learning]] · [[event-prediction]]
 - [[alec-radford]] · [[ilya-sutskever]] · [[openai]]
-- [[bert-bidirectional-transformers|BERT]] · [[scaling-neural-language-models|Scaling Laws]] · [[training-lm-follow-instructions-with-human-feedback|InstructGPT]]
+- [[bert-bidirectional-transformers|BERT Summary]] · [[scaling-neural-language-models|Scaling Laws Summary]] · [[training-lm-follow-instructions-with-human-feedback|InstructGPT Summary]]
