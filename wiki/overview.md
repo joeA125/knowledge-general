@@ -56,24 +56,39 @@ Rather than delete those concepts or pretend to sourcing, they were **written fr
 
 ## Source Acquisition Priorities
 
-The most useful thing that can be done with this vault is to reduce the table above. In descending order of pages grounded per source:
+The most useful thing that can be done with this vault is to reduce the table above. Five areas, highest need first.
 
-| Priority | Source | Would ground |
-|---|---|---|
-| **1** | A foundational RL text (Sutton & Barto) | `reinforcement-learning`, `markov-game`, `value-iteration`, `temporal-difference-learning`, `policy-modelling`, `imitation-learning` — **six pages at 60–78% imported** |
-| **2** | Mnih et al. (2015) DQN; Hester et al. (2018) DQfD | `deep-q-network`, and stabiliser material referenced from four others |
-| **3** | A measurement-theory or psychometrics text | `predictive-validity`, `split-half-reliability`, `identifiability` |
-| **4** | Guo et al. (2017) on calibration | `probability-calibration`, `probabilistic-classification`, `uncertainty-quantification` |
-| **5** | Hartley & Zisserman, *Multiple View Geometry* | `homography`, `camera-calibration` |
-| **6** | Schulman et al. (2017) PPO and TRPO | `proximal-policy-optimization`, currently sourced only through an application |
-| **7** | Rasmussen & Williams on Gaussian processes | `gaussian-process` |
-| **8** | A point-process text (Daley & Vere-Jones) | `point-process`, `neural-temporal-point-process` |
-| **9** | Goodfellow et al. (2014); Isola et al. (2017) | `conditional-gan`, `generative-model` |
-| **10** | Lee & Seung (1999); Friedman (2001) | `non-negative-matrix-factorization`, `gradient-boosting` |
+### 1. Reinforcement learning foundations
+**The vault's largest gap by a wide margin.** Nine pages at 60–78% imported, grounded only by an application paper.
 
-**Priorities 1 and 2 together would move nine pages** from the vault's weakest tier to its strongest.
+- **Sutton & Barto, *Reinforcement Learning: An Introduction*** — would ground `reinforcement-learning`, `markov-game`, `value-iteration`, `temporal-difference-learning`, `policy-modelling` in one acquisition
+- **Mnih et al. (2015), DQN** — `deep-q-network` and the stabiliser material four other pages reference
+- **Schulman et al. (2017), PPO and TRPO** — `proximal-policy-optimization` is currently sourced only through InstructGPT
 
-Two further gaps are structural rather than evidential: **`random-forest` and `feature-attribution` are referenced but have no page**, left uncreated rather than expanding the `imported:` tier further.
+### 2. Measurement and validity
+Seven pages with no source, and they underpin how every other page reasons about evidence.
+
+- **A psychometrics or classical-test-theory text** — `predictive-validity`, `split-half-reliability`, and the reliability/real-change distinction
+- **Guo et al. (2017), *On Calibration of Modern Neural Networks*** — `probability-calibration`, `probabilistic-classification`, `uncertainty-quantification`
+- **A model-selection reference** — `model-selection` is the vault's second-largest hub at 45 inbound and rests on nothing
+
+### 3. Statistics and inference
+- **Rasmussen & Williams, *Gaussian Processes for Machine Learning*** — `gaussian-process`
+- **Daley & Vere-Jones on point processes** — `point-process`, `neural-temporal-point-process`
+- **A reference on identifiability** — currently the only page arguing that more data does not always help
+
+### 4. Geometric vision
+- **Hartley & Zisserman, *Multiple View Geometry*** — grounds `homography` and `camera-calibration` together; the whole cluster rests on background knowledge
+
+### 5. Generative and ensemble methods
+- **Goodfellow et al. (2014) and Isola et al. (2017)** — `conditional-gan`, and the adversarial half of `generative-model`
+- **Friedman (2001); Lee & Seung (1999)** — `gradient-boosting`, `non-negative-matrix-factorization`
+
+---
+
+**Priorities 1 and 2 together would move fifteen pages** from the vault's weakest tier to its strongest, and are the clear first acquisition.
+
+Two gaps are structural rather than evidential: **`random-forest` and `feature-attribution` are referenced but have no page**, left uncreated rather than expanding the `imported:` tier further.
 
 ## The Hubs
 
